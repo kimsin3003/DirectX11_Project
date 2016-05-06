@@ -198,6 +198,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	WNDCLASSEX wc;
 	DEVMODE dmScreenSettings;
 	int posX, posY;
+	int windowstate;
 
 
 	// Get an external pointer to this object.	
@@ -246,6 +247,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 
 		// Set the position of the window to the top left corner.
 		posX = posY = 0;
+		windowstate = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
 	}
 	else
 	{
@@ -256,12 +258,22 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 		// Place the window in the middle of the screen.
 		posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth) / 2;
 		posY = (GetSystemMetrics(SM_CYSCREEN) - screenHeight) / 2;
+		windowstate = WS_OVERLAPPEDWINDOW;
 	}
 
 	// Create the window with the screen settings and get the handle to it.
-	m_hwnd = CreateWindowEx(WS_EX_APPWINDOW, m_applicationName, m_applicationName,
-		WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,
-		posX, posY, screenWidth, screenHeight, NULL, NULL, m_hinstance, NULL);
+	m_hwnd = CreateWindowEx(WS_EX_APPWINDOW, 
+		m_applicationName, 
+		m_applicationName,
+		windowstate,
+		posX, 
+		posY, 
+		screenWidth, 
+		screenHeight, 
+		NULL, 
+		NULL, 
+		m_hinstance, 
+		NULL);
 
 	// Bring the window up on the screen and set it as main focus.
 	ShowWindow(m_hwnd, SW_SHOW);
@@ -269,7 +281,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	SetFocus(m_hwnd);
 
 	// Hide the mouse cursor.
-	ShowCursor(false);
+	ShowCursor(true);
 
 	return;
 }
@@ -301,4 +313,30 @@ void SystemClass::ShutdownWindows()
 	ApplicationHandle = NULL;
 
 	return;
+}
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
+{
+	switch (umessage)
+	{
+		// Check if the window is being destroyed.
+	case WM_DESTROY:
+	{
+		PostQuitMessage(0);
+		return 0;
+	}
+
+	// Check if the window is being closed.
+	case WM_CLOSE:
+	{
+		PostQuitMessage(0);
+		return 0;
+	}
+
+	// All other messages pass to the message handler in the system class.
+	default:
+	{
+		return ApplicationHandle->MessageHandler(hwnd, umessage, wparam, lparam);
+	}
+	}
 }

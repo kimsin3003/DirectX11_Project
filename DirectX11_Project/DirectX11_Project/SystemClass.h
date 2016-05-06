@@ -1,16 +1,14 @@
 #pragma once
 
 #include <windows.h>
-#include "inputclass.h"
-#include "graphicsclass.h"
+#include "InputClass.h"
+#include "GraphicsClass.h"
 
 class SystemClass
 {
 public:
-	SystemClass();
-	SystemClass(const SystemClass&);
-	~SystemClass();
 
+	SystemClass();
 	bool Initialize();
 	void Shutdown();
 	void Run();
@@ -35,7 +33,4 @@ private:
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 
-static SystemClass* ApplicationHandle = 0;
-
-
-#endif
+static SystemClass* ApplicationHandle = nullptr;
